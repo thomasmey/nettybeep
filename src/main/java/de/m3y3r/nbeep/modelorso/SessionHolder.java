@@ -1,6 +1,8 @@
-package de.m3y3r.nbeep;
+package de.m3y3r.nbeep.modelorso;
 
 import java.util.Map;
+
+import de.m3y3r.nbeep.Channel;
 
 /* models an BEEP session */
 public class SessionHolder {

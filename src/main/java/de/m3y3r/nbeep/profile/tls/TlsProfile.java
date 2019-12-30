@@ -1,6 +1,7 @@
-package de.m3y3r.nbeep.profile.tls.model;
+package de.m3y3r.nbeep.profile.tls;
 
 import de.m3y3r.nbeep.Profile;
+import de.m3y3r.nbeep.Session;
 
 public class TlsProfile implements Profile {
 
@@ -11,6 +12,11 @@ public class TlsProfile implements Profile {
 
 	@Override
 	public String getName() {
+		return null;
+	}
+
+	@Override
+	public Object getApi(Session session) {
 		return null;
 	}
 }

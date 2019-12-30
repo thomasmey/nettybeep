@@ -1,11 +1,16 @@
 package de.m3y3r.nbeep;
 
-import java.util.Set;
-
 /* models a profile registration */
-public interface Profile {
+public interface Profile<T> {
+
 	String getName();
 	String getUri();
+
+	/**
+	 * returns the associated API for this profile
+	 * @return
+	 */
+	T getApi(Session session);
 
 	//TODO: provide default impl for below
 //	Set<Class> getMessagesDuringChannelCreation();

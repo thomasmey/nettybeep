@@ -7,5 +7,10 @@ import de.m3y3r.nbeep.Profile;
 
 public interface ChannelManagement {
 	Channel startChannel(int channelNo, List<Profile> profiles, Object msg);
+
+	/**
+	 * closes a given channel
+	 * @param channelNo
+	 */
 	void stopChannel(int channelNo);
 }
