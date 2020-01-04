@@ -1,7 +1,6 @@
-package de.m3y3r.nbeep.impl.netty;
+package de.m3y3r.nbeep.netty.codec;
 
-import java.nio.charset.StandardCharsets;
-
+import de.m3y3r.nbeep.netty.model.frame.data.FrameHeader;
 import io.netty.buffer.ByteBuf;
 
 public class FrameDecodeState {

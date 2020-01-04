@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.Test;
 
+import de.m3y3r.nbeep.netty.model.frame.data.FrameHeader;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 

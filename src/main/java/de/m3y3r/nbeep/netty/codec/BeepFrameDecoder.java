@@ -1,15 +1,11 @@
-package de.m3y3r.nbeep.impl.netty;
+package de.m3y3r.nbeep.netty.codec;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import de.m3y3r.nbeep.frame.data.AnswerFrame;
-import de.m3y3r.nbeep.frame.data.DataFrame;
-import de.m3y3r.nbeep.frame.data.ErrorFrame;
-import de.m3y3r.nbeep.frame.data.MessageFrame;
-import de.m3y3r.nbeep.frame.data.NullFrame;
-import de.m3y3r.nbeep.frame.data.ReplyFrame;
-import de.m3y3r.nbeep.impl.netty.FrameDecodeState.State;
+import de.m3y3r.nbeep.netty.codec.FrameDecodeState.State;
+import de.m3y3r.nbeep.netty.model.frame.data.DataFrame;
+import de.m3y3r.nbeep.netty.model.frame.data.FrameHeader;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -19,7 +15,7 @@ import io.netty.handler.codec.ReplayingDecoder;
 public class BeepFrameDecoder extends ReplayingDecoder<FrameDecodeState> {
 
 	private ByteBuf delimiter = Delimiters.lineDelimiter()[0];
-	private ByteBuf trailer = Unpooled.wrappedBuffer("END\r\n".getBytes(StandardCharsets.US_ASCII));
+	private ByteBuf trailerShould = Unpooled.wrappedBuffer("END\r\n".getBytes(StandardCharsets.US_ASCII));
 
 	public BeepFrameDecoder() {
 		super(new FrameDecodeState(State.HEADER));
@@ -43,32 +39,18 @@ public class BeepFrameDecoder extends ReplayingDecoder<FrameDecodeState> {
 			state().setState(State.PAYLOAD);
 			break;
 		case PAYLOAD:
-			state().setPayload(in.readRetainedSlice(Integer.parseInt(state().getHeader().getSize())));
+			state().setPayload(in.readRetainedSlice(state().getHeader().getSize()));
 			state().setState(State.TRAILER);
 			break;
 		case TRAILER:
-			if(in.readSlice(trailer.readableBytes()).compareTo(trailer) != 0) {
+			ByteBuf trailerIs = in.readSlice(trailerShould.readableBytes());
+			if(trailerIs.compareTo(trailerShould) != 0) {
 				invalidFrame("wrong trailer");
 			}
-			frameHeader = state().getHeader();
-			ByteBuf payload = state().getPayload();
-			DataFrame dataFrame = null;
-			switch(frameHeader.getType()) {
-			case "MSG": dataFrame = new MessageFrame(); break;
-			case "RPY": dataFrame = new ReplyFrame(); break;
-			case "ANS":
-				dataFrame = new AnswerFrame();
-				((AnswerFrame)dataFrame).setAnsNo(Integer.parseInt(frameHeader.getAnsNo()));
-				break;
-			case "ERR": dataFrame = new ErrorFrame(); break;
-			case "NUL": dataFrame = new NullFrame(); break;
-			}
-			dataFrame.setChannel(Integer.parseInt(frameHeader.getChannel()));
-			dataFrame.setMsgNo(Integer.parseInt(frameHeader.getMsgNo()));
-			dataFrame.setMore(frameHeader.getMore().equals("*"));
-			dataFrame.setSeqNo(Long.parseLong(frameHeader.getSeqNo()));
-			dataFrame.setSize(Integer.parseInt(frameHeader.getSize()));
-			dataFrame.setPayload(payload /* .nioBuffer(); */ );
+
+			DataFrame dataFrame = new DataFrame();
+			dataFrame.setHeader(state().getHeader());
+			dataFrame.setPayload(state().getPayload());
 			out.add(dataFrame);
 			state().setState(State.HEADER);
 			break;
@@ -88,7 +70,7 @@ public class BeepFrameDecoder extends ReplayingDecoder<FrameDecodeState> {
 	 * found in the haystack.
 	 */
 	private static int indexOf(ByteBuf haystack, ByteBuf needle, int maxLength) {
-		for (int i = 0; i <= maxLength; i ++) {
+        for (int i = haystack.readerIndex(), j = 0; i < haystack.writerIndex() && j <= maxLength; i++, j++) {
 			int haystackIndex = i;
 			int needleIndex;
 			for (needleIndex = 0; needleIndex < needle.capacity(); needleIndex ++) {

@@ -1,11 +1,16 @@
-package de.m3y3r.nbeep.impl.netty;
+package de.m3y3r.nbeep.netty;
 
 import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.m3y3r.nbeep.Server;
+import de.m3y3r.nbeep.BEEP;
+import de.m3y3r.nbeep.api.Server;
+import de.m3y3r.nbeep.api.Session;
+import de.m3y3r.nbeep.netty.codec.BeepFrameDecoder;
+import de.m3y3r.nbeep.netty.codec.ChannelHandler;
+import de.m3y3r.nbeep.netty.codec.PoorlyFormedFrameHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -20,6 +25,7 @@ public class NettyBeepServer implements Server {
 	private static final Logger logger = LoggerFactory.getLogger(NettyBeepServer.class.getName());
 	private EventLoopGroup eventLoopGroup;
 	private Channel channel;
+	private BEEP beep;
 
 	@Override
 	public void start(Properties config) {
@@ -32,7 +38,10 @@ public class NettyBeepServer implements Server {
 				.childHandler(new ChannelInitializer<SocketChannel>() {
 					@Override
 					protected void initChannel(SocketChannel ch) throws Exception {
+						Session session = BEEP.newSession(ch);
 						ch.pipeline().addLast("frameDecoder", new BeepFrameDecoder());
+						ch.pipeline().addLast("poorlyFrameHandler", new PoorlyFormedFrameHandler(session));
+						ch.pipeline().addLast("channelHandler", new ChannelHandler(session));
 					}
 				});
 			ChannelFuture f = b.bind(port).sync();

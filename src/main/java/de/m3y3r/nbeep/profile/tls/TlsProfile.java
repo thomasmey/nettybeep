@@ -1,7 +1,8 @@
 package de.m3y3r.nbeep.profile.tls;
 
 import de.m3y3r.nbeep.Profile;
-import de.m3y3r.nbeep.Session;
+import de.m3y3r.nbeep.ProfileCodec;
+import de.m3y3r.nbeep.api.Session;
 
 public class TlsProfile implements Profile {
 
@@ -17,6 +18,11 @@ public class TlsProfile implements Profile {
 
 	@Override
 	public Object getApi(Session session) {
+		return null;
+	}
+
+	@Override
+	public ProfileCodec getProfileCodec(Session session) {
 		return null;
 	}
 }

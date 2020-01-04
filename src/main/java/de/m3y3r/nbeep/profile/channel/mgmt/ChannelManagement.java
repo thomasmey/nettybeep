@@ -2,11 +2,13 @@ package de.m3y3r.nbeep.profile.channel.mgmt;
 
 import java.util.List;
 
-import de.m3y3r.nbeep.Channel;
+import org.eclipse.persistence.oxm.MediaType;
+
 import de.m3y3r.nbeep.Profile;
+import de.m3y3r.nbeep.api.Channel;
 
 public interface ChannelManagement {
-	Channel startChannel(int channelNo, List<Profile> profiles, Object msg);
+	Channel startChannel(int channelNo, List<Profile> profiles, Object payload, MediaType mediaType);
 
 	/**
 	 * closes a given channel
